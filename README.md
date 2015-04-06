@@ -9,10 +9,15 @@ template php engein
  * 
  * ----------------------------------------------------------------------
  * 
- * examples of usage :
- *   $syntaxcode = new __SYNTAX( );
- *   $arrthis = $syntaxcode->openfile('template/sfhati/mobile.inc');
- * 
+$syntaxcode = new __SYNTAX();
+$export_filename = $syntaxcode->openfile('template.inc');
+echo $export_filename;
+
+Template.inc code like this : 
+ [var:"variable"end var] 
+ 
+ output php file in cache folder contain this code 
+ <?php echo $variable;?>
  * 
  * 
  * The __SYNTAX( ) method return output php code, as a string.
