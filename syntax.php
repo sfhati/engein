@@ -1,7 +1,7 @@
 <?php
 
 /**
- * 25 March 2015. version 1.0
+ * 25 March 2015. version 1.0 
  * 
  * Template engine for PHP,
  * 
@@ -23,7 +23,7 @@
  * # need PHP 5+
  * @author Bassam al-essawi <bassam.a.a.r@gmail.com>
  * @package sfhati
- * @subpackage fw
+ * @subpackage fw - --
  * 
  */
 set_time_limit('5');
@@ -293,10 +293,10 @@ if ($dh = opendir($dir)) {
     closedir($dh);
 }
 
-
+$bassam="var bassam here";
 $syntaxcode = new __SYNTAX();
 
-$export_filename = $syntaxcode->openfile('template.inc');
+include( $syntaxcode->openfile('template.inc') );
 echo $export_filename;
 //include($export_filename);
 
