@@ -1,9 +1,10 @@
 <?php
+
 /*
   use like [include:"template_file_without.inc"end include]
   [include:"temp"end include] //get content from template file name temp.inc in same folder of template source
-  [include:"../temp"end include] 
-  [include:"../temp.inc"end include] 
+  [include:"../temp"end include]
+  [include:"../temp.inc"end include]
   [include:"{template}temp"end include] // this value {template} use in sfhati framework to get template folder
   [include:"{plugin}temp"end include] // this value {template} use in sfhati framework to get plugin folder
   [include:"{tmp}temp"end include] // this value {template} use in sfhati framework to get tmp folder
@@ -26,6 +27,7 @@ function include_SYNTAX($vars) {
         $vars = str_replace('{tmp}', TMP_PATH, $vars);
         $vars = str_replace('{cache}', CACHE_PATH, $vars);
         $vars = str_replace('{uploaded}', UPLOADED_PATH, $vars);
+        $vars = str_replace('{theme}', THEME_PATH, $vars);
         $path = str_replace('//', '/', $vars);
     } else {
         $path = rtrim(realpath(dirname($syntaxcode->filename)), '/') . '/' . $vars;

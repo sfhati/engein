@@ -1,0 +1,1 @@
+<br>hi man this is include template name template_include.inc!<br>

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * 25 March 2015. version 1.0 
+ * 25 March 2015. version 1.0
  * 
  * Template engine for PHP,
  * 
@@ -17,25 +17,20 @@
  * 
  * The __SYNTAX( ) method return output php code, as a string.
  * 
- * see http://sfhati.com/fw/syntax/ for more information.
+ * see http://sfhati.com/engein/ for more information.
  * 
  * Notes :
  * # need PHP 5+
  * @author Bassam al-essawi <bassam.a.a.r@gmail.com>
  * @package sfhati
- * @subpackage fw - --
+ * @subpackage fw
  * 
  */
-set_time_limit('5');
-ini_set('memory_limit', '8M');
-ini_set('display_errors', '1');
-error_reporting(E_ERROR | E_WARNING | E_PARSE);
 
 /**
  * translate template code to php file and store it in cache folder to use as php files
  *
  * @param string $cache_path defult __DIR__ , full path for cache store php files output
- * @param string $conf_file defult conf , name file for cached template export
  * @param boolean $write_source defult true , write template code in export php file as commant
  * @return string php code  
  */
@@ -43,15 +38,13 @@ class __SYNTAX {
 
     private $ALL_SYNTAX = '';
     private $cache_path = '';
-    private $conf_file = 'conf.tmp';
     public $filename = '';
 
-    public function __construct($cache_path = '', $conf_file = 'conf.tmp') {
+    public function __construct($cache_path = '') {
         if ($cache_path)
             $this->cache_path = $cache_path;
         else
             $this->cache_path = __DIR__ . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR;
-        $this->conf_file = $conf_file;
     }
 
     /**
@@ -65,46 +58,45 @@ class __SYNTAX {
         if (!file_exists($templatefile))
             return 'File not found!';
 
-        $export_php_file = $this->cache_path . md5_file($templatefile) . '.php';
-        //check if already translate by search in md5 file return 
-        if ($this->check_cache(md5($templatefile), md5($export_php_file)))
+        $export_php_file = $this->cache_path . md5($templatefile) . '_' . md5_file($templatefile) . '.php';
+        //check if already translate 
+        if (file_exists($export_php_file))
             return $export_php_file;
 
         $this->filename = $templatefile;
 
-        //open file & get content to ALL_SYNTAX
+        //open file & get content to ALL_SYNTAX        
         $this->ALL_SYNTAX = implode(file($templatefile), '');
+        // if there is php code will show as content in output
+        $this->ALL_SYNTAX = str_replace(array('<?','?>'), array('&lt;?','?&gt;'), $this->ALL_SYNTAX);
         //start translate template code
         $t = $this->Syntax($this->ALL_SYNTAX);
+        //delete old php files from cache folder
+        $this->clearcache(md5($templatefile));
         //write php file
         $this->filewrite($export_php_file, $t);
-        //set in conf cache file
-        if (file_exists($this->conf_file)) {
-            $DataConf = file($this->conf_file);
-            $set_content = '';
-            foreach ($DataConf as $row) {
-                $search_row = explode(';', $row);
-                if (trim($search_row[0]) != trim(md5($templatefile)))
-                    $set_content.=$row;
-            }
-        }
-        $this->filewrite($this->conf_file, md5($templatefile) . ';' . md5($export_php_file) . "\n" . $set_content);
         return $export_php_file;
     }
 
     /**
-     * check cache file
+     * Clear php file from cache folder 
+     * 
      *
-     * @param string $templatefile full path for template file
-     * @param string $md5 md5 for template file
-     * @return boolean true for exist cache file otherwise false  
+     * @param string $file full path and file name     
+     * @return none!  
      */
-    private function check_cache($templatefile, $md5) {
-        if (!file_exists($this->conf_file))
-            return false;
-        if (in_array(trim($templatefile . ';' . $md5), array_map('trim', file($this->conf_file))))
-            return true;
-        return false;
+    private function clearcache($templatefile) {
+        $dir = $this->cache_path;
+        if ($dh = opendir($dir)) {
+
+            while (($file = readdir($dh)) !== false) {
+                $pathtemplate = explode('_', $file);
+                if ($pathtemplate[0] == $templatefile) {
+                    @unlink($dir . $file);
+                }
+            }
+            closedir($dh);
+        }
     }
 
     /**
@@ -137,6 +129,7 @@ class __SYNTAX {
     private function GetSyantax($t) {
         //search for pattern like [if:"
         preg_match("/\[(\w)+:\"/", $t, $out);
+
         $word = str_replace('[', '', $out[0]);
         $word = str_replace(':"', '', $word);
         // nothing to return if not found syntax 
@@ -256,7 +249,7 @@ class __SYNTAX {
         $t = str_replace('"end XXX]', '', $t);
 
         // call command function with array vars 
-        $com = $command . '_SYNTAX';
+        $com = $command . '_SYNTAX';         
         return $com(explode('|,|', trim($t, '"')));
     }
 
@@ -281,40 +274,4 @@ class __SYNTAX {
 
 }
 
-// include all plugin
-$dir = dirname(realpath(__FILE__)) . DIRECTORY_SEPARATOR . 'plugin' . DIRECTORY_SEPARATOR;
-if ($dh = opendir($dir)) {
 
-    while (($file = readdir($dh)) !== false) {
-        if ($file != '.' && $file != '..' && filetype($dir . $file) != 'dir') {
-            include($dir . $file);
-        }
-    }
-    closedir($dh);
-}
-
-$bassam="var bassam here";
-$syntaxcode = new __SYNTAX();
-
-include( $syntaxcode->openfile('template.inc') );
-echo $export_filename;
-//include($export_filename);
-
-
-/*
-[element:"type","name","lable","rules","msg rules","filter","style","more option"end element]
-
----Type---
-group,hidden,reset,checkbox,file,color,image,password,
-radio,button,submit,select,text,textarea,link,date,static,
-header,html,autocomplete,
-
----rules---
-required,maxlength,minlength,rangelength,email,regex,
-lettersonly,alphanumeric,numeric,nopunctuation,
-nonzero,compare,callback[function name]
-
----filter---
-trim , lowercase,hgircase,callback[function name]
-
- *  */
