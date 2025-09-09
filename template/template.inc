@@ -1,240 +1,264 @@
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-        <meta name="description" content="">
-        <meta name="author" content="">
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[var:"page_title"end var] - محرك القوالب الحديث</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .code-example { background: #f8f9fa; border-left: 4px solid #007bff; }
+        .result-box { background: #d4edda; border: 1px solid #c3e6cb; }
+        .error-box { background: #f8d7da; border: 1px solid #f5c6cb; }
+        .sidebar { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card-hover:hover { transform: translateY(-2px); transition: transform 0.2s; }
+    </style>
+</head>
 
-
-        <title>Sfhati PHP engine</title>
-
-        <!-- Bootstrap core CSS -->
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
-
-    </head>
-
-    <body>
-
-        <div class="container">
-            <div class="header clearfix">
-                <nav>
-                    <ul class="nav nav-pills pull-right">
-                        <li role="presentation" class=""><a href="http://sfhati.com">sfhati site</a></li>
-                        <li role="presentation"><a href="http://www.phpclasses.org/package/9106-PHP-Template-engine-that-generates-PHP-compiled-files.html">phpclasses</a></li>
-                    </ul>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 sidebar text-white p-4">
+                <h4><i class="bi bi-gear-fill"></i> محرك القوالب</h4>
+                <p class="small">إصدار محدث للعمل مع PHP 8+</p>
+                
+                <nav class="nav flex-column mt-4">
+                    [each:"navigation_items","
+                        <a class=\"nav-link text-white-50 
+                        [if:\"%navigation_items:val[active]-var%==true\",\"active text-white\"end if]\" 
+                        href=\"%navigation_items:val[url]%\">
+                            <i class=\"%navigation_items:val[icon]%\"></i>
+                            %navigation_items:val[title]%
+                        </a>
+                    "end each]
                 </nav>
-                <h3 class="text-muted">Sfhati PHP engine</h3>
-            </div>
-
-            <div class="jumbotron">
-                <h1>Sfhati PHP engine</h1>
-                <p class="lead">This package implements a template engine that generates PHP compiled files.
-                    It takes a given template file and processes it replacing variables and other types of template constructs.
-                    The class return the path of PHP script that is the compiled template ready to be executed.
-                    The package comes with several plugins that implement variable replacement, conditional sections, loops, and including additional template files.</p>
-                <p><a class="btn btn-lg btn-success" href="https://github.com/sfhati/engein" role="button">Download Form Github</a></p>
-            </div>
-
-            <div class="row marketing">
-                <div class="col-lg-6">
-                    <h4>install & config</h4>
-                    <p>unzip file you already downloaded</p>
-                    <p></p>
-                    <code>include('syntax.php'); </code>
-                    <p>include syntax.php file</p>
-                    <code>$syntaxcode = new __SYNTAX(); </code>
-                    <p>use same variable name in this line:</p>
-
-                    <code>$syntaxcode = new __SYNTAX('full_path_folder_here/'); </code>
-                    <p>you can add path for folder cache like this </p>
-
-                    <h4>index.php file content</h4>
-                    <p>we make this file to use it in your project, so this will help you:)</p>
-                    <pre><code>
-
-error_reporting(E_ERROR | E_WARNING | E_PARSE);
-
-
-// include class file
-include('syntax.php'); 
- $syntaxcode = new __SYNTAX();
-// include all plugin
-$dir = dirname(realpath(__FILE__)) . DIRECTORY_SEPARATOR . 'plugin' . DIRECTORY_SEPARATOR;
-if ($dh = opendir($dir)) {
-
-    while (($file = readdir($dh)) !== false) {
-        if ($file != '.' && $file != '..' && filetype($dir . $file) != 'dir') {
-            include($dir . $file);
-        }
-    }
-    closedir($dh);
-}
-
-// this function can translate template file and return execute php file content as a variable , 
-// so you can make things in out content!
-function include_file_template($template_name) {
-    global $syntaxcode;
- 
-    if (end(explode('.', $template_name)) != 'inc')
-        $template_name = $template_name . '.inc';
-    $export_filename = $syntaxcode->openfile($template_name);
-    
-    ob_start();   
-    include($export_filename);
-    return ob_get_clean();
-}
-
-// translate template.inc file using include_file_template() function 
-$my_simple_tmplt = include_file_template('template/template.inc');
-
-// print out exeute php file 
-echo $my_simple_tmplt;
-              
-          </code></pre>
-
+                
+                <div class="mt-5">
+                    <h6>معلومات النظام</h6>
+                    <small class="text-white-50">
+                        PHP: [var:"PHP_VERSION-cons"end var]<br>
+                        الوقت: [date:"Y-m-d H:i:s","now"end date]<br>
+                        المستخدم: [var:"current_user-sess"end var]
+                    </small>
                 </div>
-
-                <div class="col-lg-6">
-                    <h4>use code in template file</h4>
-                    <h5><b>var plugin</b> option you can used : <code>-var</code> , <code>-sess</code> , <code>-cons</code></h5>
-
-                    <code>&#91;var:"variable"end var&#93;</code>
-                    result
-                    <pre><code>echo $variable;</code></pre>
-                    <code>&#91;var:"variable-var"end var&#93;</code>
-                    result
-                    <pre><code>$variable</code></pre>
-                    <code>&#91;var:"variable-sess"end var&#93;</code>
-                    result
-                    <pre><code>echo $_SESSION[variable];</code></pre>
-                    <code>&#91;var:"variable-sess-var"end var&#93;</code>
-                    result
-                    <pre><code>$_SESSION[variable]</code></pre>
-                    <code>&#91;var:"variable[word]"end var&#93;</code>
-                    result
-                    <pre><code>echo $variable[word];</code></pre>
-                    <code>&#91;var:"variable-cons"end var&#93;</code>
-                    result
-                    <pre><code>echo variable;</code></pre>
-                    </p>
-
-                    <hr>
-                    
-                    <h5><b>if plugin</b></h5>
-
-                    use like<code>&#91;if:"expr","statement"end if&#93;</code><br>
-                    Real Ex.<br>
-                    <code>&#91;if:"&#91;var:"a-var"end var&#93;==1","yes a = 1 &#91;else&#93; no its not 1!"end if&#93;</code>
-                    result
-                    <pre><code><?php if ($a==1) { ?>
-    yes a = 1 <?php }else{ ?> no its not 1!     
-<?php } ?></code></pre>
-                    </p>
-
-
-
-                    <hr>
-                    
-                    <h5><b>for plugin</b></h5>
-  use like <code>&#91;for:"id for this loop","start counter","count to","content loop"end for&#93;</code><br>
-  Real Ex.<br>
-  <code>&#91;for:"lop","4","10","this is %lop% , so can use as a var like %lop-var% "end for&#93;</code> <br>
-  Result<br>
-<pre><code><?php for ($lop = 4; $lop < 10; $lop++) { ?>
-    this is <?php echo "$lop"; ?> , so can use as a var like $lop  
-<?php } ?></code></pre> 
-    
-  other Ex.
-  <code>&#91;for:"lop","4","10","<br>
-      use value as a variable inside if statement!<br> 
-      &#91;if:"%lop-var%==1","yes a = 1 "end if&#93; <br> 
-"end for&#93;</code> 
-  
-  <br>Result<br>
-<pre><?php for ($lop = 4; $lop < 10; $lop++) { ?>
-    use value as a variable inside if statement! 
-    <?php if ($lop == 1) { ?>
-        yes a = 1      
-    <?php } ?>
-<?php } ?></pre>
-                    </p>
-
- <hr>
- 
-
-  <h5><b>each plugin</b> option can use : <code>-sess</code> for session array</h5>
-  use like <code>&#91;each:"array_expression-option","statement"end each&#93;</code><br>
-  Real Ex.<br>
-  <code>&#91;each:"array_expression","<br>
- statement use :<br>
-  %array_expression:key% // print key<br>
-  %array_expression:val% // print value<br> 
-  %array_expression:val-var% //not print value just for use as a variable<br>
-  %array_expression:% //print 0/1<br>
-  %array_expression:#% //print counter row<br>
-  %array_expression:val[word]% // if value is array you can print item form it<br>
-  %array_expression:val[word-var]% // if value is array you can use item value as variable<br>
-  %array_expression:val['word word']% // you can use ' for word contain space chr<br>      
-"end each&#93;</code> <br>
-
-
-  <br>Result<br>
-<pre><?php
-$countrnd166arrayexpression = 0;
-if (is_array($array_expression))
-    foreach ($array_expression as $krnd166arrayexpression => $vrnd166arrayexpression) {
-        $countrnd166arrayexpression++;
-        $stlrnd166arrayexpression = ($stlrnd166arrayexpression == 1) ? 0 : 1;
-        ?>
-
-        statement use :
-        <?php echo $krnd166arrayexpression; ?> // print key
-        <?php echo $vrnd166arrayexpression; ?> // print value
-        $vrnd166arrayexpression //not print value just for use as a variable
-        <?php echo $stlrnd166arrayexpression; ?> //print 0/1
-        <?php echo $countrnd166arrayexpression; ?> //print counter row
-        <?php echo $vrnd166arrayexpression[word]; ?> // if value is array you can print item form it
-        $vrnd166arrayexpression[word] // if value is array you can use item value as variable
-        <?php echo $vrnd166arrayexpression['word word']; ?> // you can use ' for word contain space chr
-
-    <?php } ?></pre>
-                    </p>
-
-                    <hr>
-                    
-                    <h5><b>include plugin</b></h5>
-
-                    use like<code>&#91;include:"template_file_without.inc"end include&#93;</code><br>
-                    Real Ex.<br>
-                    <code><br>
-  &#91;include:"temp"end include&#93; //get content from template file name temp.inc in same folder of template source<br>
-  &#91;include:"../temp"end include&#93;<br>
-  &#91;include:"../temp.inc"end include&#93;<br>
-  &#91;include:"{template}temp"end include&#93; // this value {template} use in sfhati framework to get template folder<br>
-  &#91;include:"{plugin}temp"end include&#93; // this value {template} use in sfhati framework to get plugin folder<br>
-  &#91;include:"{tmp}temp"end include&#93; // this value {template} use in sfhati framework to get tmp folder<br>
-  &#91;include:"{cache}temp"end include&#93; // this value {template} use in sfhati framework to get cache folder<br>
-  &#91;include:"{uploaded}temp"end include&#93; // this value {template} use in sfhati framework to get uploaded folder<br>
-                    <br>
-                    </code>
-                   
-                    </p>
-
-
-
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-9 p-4">
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1>[var:"page_title"end var]</h1>
+                    <div>
+                        [if:"[var:"user_logged_in-sess-var"end var]==true","
+                            <div class=\"dropdown\">
+                                <button class=\"btn btn-outline-primary dropdown-toggle\" type=\"button\" data-bs-toggle=\"dropdown\">
+                                    <i class=\"bi bi-person-circle\"></i>
+                                    [var:"username-sess"end var]
+                                </button>
+                                <ul class=\"dropdown-menu\">
+                                    <li><a class=\"dropdown-item\" href=\"#\">الملف الشخصي</a></li>
+                                    <li><a class=\"dropdown-item\" href=\"#\">الإعدادات</a></li>
+                                    <li><hr class=\"dropdown-divider\"></li>
+                                    <li><a class=\"dropdown-item\" href=\"#\">تسجيل الخروج</a></li>
+                                </ul>
+                            </div>
+                        [else]
+                            <a href=\"login.php\" class=\"btn btn-primary\">
+                                <i class=\"bi bi-box-arrow-in-right\"></i>
+                                تسجيل الدخول
+                            </a>
+                        "end if]
+                    </div>
                 </div>
- </div>
-                <footer class="footer">
-                    <p>&copy; Company 2014</p>
-                </footer>
-
-            </div> <!-- /container -->
-
-
-
-    </body>
+                
+                <!-- Alert Messages -->
+                [if:"[var:"success_message-sess-var"end var]","
+                    <div class=\"alert alert-success alert-dismissible fade show\" role=\"alert\">
+                        <i class=\"bi bi-check-circle-fill\"></i>
+                        [var:"success_message-sess"end var]
+                        <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\"></button>
+                    </div>
+                "end if]
+                
+                [if:"[var:"error_message-sess-var"end var]","
+                    <div class=\"alert alert-danger alert-dismissible fade show\" role=\"alert\">
+                        <i class=\"bi bi-exclamation-triangle-fill\"></i>
+                        [var:"error_message-sess"end var]
+                        <button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\"></button>
+                    </div>
+                "end if]
+                
+                <!-- Features Section -->
+                <div class="row mb-5">
+                    <div class="col-md-12">
+                        <h2>الميزات الجديدة</h2>
+                        <div class="row">
+                            [each:"features","
+                                <div class=\"col-md-6 col-lg-4 mb-4\">
+                                    <div class=\"card h-100 card-hover\">
+                                        <div class=\"card-body\">
+                                            <div class=\"d-flex align-items-center mb-3\">
+                                                <i class=\"%features:val[icon]% fs-2 text-primary me-3\"></i>
+                                                <h5 class=\"card-title mb-0\">%features:val[title]%</h5>
+                                            </div>
+                                            <p class=\"card-text\">%features:val[description]%</p>
+                                            [if:\"%features:val[new]-var%==true\",\"<span class='badge bg-success'>جديد</span>\"end if]
+                                        </div>
+                                    </div>
+                                </div>
+                            "end each]
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Code Examples -->
+                <div class="row">
+                    <div class="col-md-12">
+                        <h2>أمثلة الاستخدام</h2>
+                        
+                        <!-- Variable Example -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5><i class="bi bi-code-slash"></i> مثال: المتغيرات</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="code-example p-3 rounded mb-3">
+                                    <code>[var:"username"end var]</code>
+                                </div>
+                                <div class="result-box p-3 rounded">
+                                    <strong>النتيجة:</strong> [var:"demo_username"end var]
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Loop Example -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5><i class="bi bi-arrow-repeat"></i> مثال: الحلقات</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="code-example p-3 rounded mb-3">
+                                    <code>[for:"i","1","4","&lt;span class=\"badge bg-secondary me-1\"&gt;%i%&lt;/span&gt;"end for]</code>
+                                </div>
+                                <div class="result-box p-3 rounded">
+                                    <strong>النتيجة:</strong> 
+                                    [for:"i","1","4","<span class=\"badge bg-secondary me-1\">%i%</span>"end for]
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Array Example -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5><i class="bi bi-list-ul"></i> مثال: المصفوفات</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="code-example p-3 rounded mb-3">
+                                    <code>[each:"demo_items","&lt;li&gt;%demo_items:key% - %demo_items:val%&lt;/li&gt;"end each]</code>
+                                </div>
+                                <div class="result-box p-3 rounded">
+                                    <strong>النتيجة:</strong>
+                                    <ul class="mb-0">
+                                        [each:"demo_items","<li>%demo_items:key% - %demo_items:val%</li>"end each]
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Conditional Example -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5><i class="bi bi-question-circle"></i> مثال: الشروط</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="code-example p-3 rounded mb-3">
+                                    <code>[if:"[var:"is_admin-var"end var]==true","&lt;span class=\"text-success\"&gt;مدير&lt;/span&gt;[else]&lt;span class=\"text-muted\"&gt;مستخدم عادي&lt;/span&gt;"end if]</code>
+                                </div>
+                                <div class="result-box p-3 rounded">
+                                    <strong>النتيجة:</strong> 
+                                    [if:"[var:"is_admin-var"end var]==true","<span class=\"text-success\">مدير</span>[else]<span class=\"text-muted\">مستخدم عادي</span>"end if]
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Statistics -->
+                <div class="row mt-5">
+                    <div class="col-md-12">
+                        <h2>إحصائيات</h2>
+                        <div class="row">
+                            [each:"statistics","
+                                <div class=\"col-md-3 col-sm-6 mb-3\">
+                                    <div class=\"card text-center\">
+                                        <div class=\"card-body\">
+                                            <i class=\"%statistics:val[icon]% fs-1 text-primary mb-2\"></i>
+                                            <h3 class=\"card-title\">%statistics:val[value]%</h3>
+                                            <p class=\"card-text text-muted\">%statistics:val[label]%</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            "end each]
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Include Example -->
+                <div class="mt-5">
+                    <h2>مثال: إدراج القوالب</h2>
+                    <div class="card">
+                        <div class="card-body">
+                            [comment:"This will include footer template"end comment]
+                            [include:"template_include"end include]
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-4 mt-5">
+        <div class="container">
+            <p>&copy; [date:"Y","now"end date] محرك القوالب الحديث. جميع الحقوق محفوظة.</p>
+            <p class="small">
+                تم التطوير باستخدام PHP [var:"PHP_VERSION-cons"end var] 
+                | آخر تحديث: [date:"d/m/Y","now"end date]
+            </p>
+        </div>
+    </footer>
+    
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    [raw:"
+    <script>
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            var alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                var bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+        
+        // Add smooth scrolling
+        document.querySelectorAll('a[href^=\"#\"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
+    "end raw]
+</body>
 </html>
-
