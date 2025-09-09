@@ -11,30 +11,50 @@
   [include:"{cache}temp"end include] // this value {template} use in sfhati framework to get cache folder
   [include:"{uploaded}temp"end include] // this value {template} use in sfhati framework to get uploaded folder
  */
-
-function include_SYNTAX($vars) {
+function include_SYNTAX(array $vars): string {
     global $syntaxcode;
-    $vars = $syntaxcode->Syntax($vars[0]);
-    $incfile = end(explode('/', $vars));
-    if (end(explode('.', $incfile)) != 'inc') {
-        $incfile.='.inc';
-        $vars.='.inc';
+    
+    $templateFile = $vars[0] ?? '';
+    
+    if (isset($syntaxcode) && method_exists($syntaxcode, 'processSyntax')) {
+        $templateFile = $syntaxcode->processSyntax($templateFile);
     }
-    // replace static folder name 
-    if (strpos($vars, '}')) {
-        $vars = str_replace('{plugin}', PLUGIN_PATH, $vars);
-        $vars = str_replace('{template}', TEMPLATE_PATH, $vars);
-        $vars = str_replace('{tmp}', TMP_PATH, $vars);
-        $vars = str_replace('{cache}', CACHE_PATH, $vars);
-        $vars = str_replace('{uploaded}', UPLOADED_PATH, $vars);
-        $vars = str_replace('{theme}', THEME_PATH, $vars);
-        $path = str_replace('//', '/', $vars);
+    
+    // Add .inc extension if not present
+    if (!str_ends_with($templateFile, '.inc')) {
+        $templateFile .= '.inc';
+    }
+    
+    // Handle framework path placeholders
+    $pathReplacements = [
+        '{plugin}' => defined('PLUGIN_PATH') ? PLUGIN_PATH : 'plugin/',
+        '{template}' => defined('TEMPLATE_PATH') ? TEMPLATE_PATH : 'template/',
+        '{tmp}' => defined('TMP_PATH') ? TMP_PATH : 'tmp/',
+        '{cache}' => defined('CACHE_PATH') ? CACHE_PATH : 'cache/',
+        '{uploaded}' => defined('UPLOADED_PATH') ? UPLOADED_PATH : 'uploaded/',
+        '{theme}' => defined('THEME_PATH') ? THEME_PATH : 'theme/'
+    ];
+    
+    $templateFile = str_replace(array_keys($pathReplacements), array_values($pathReplacements), $templateFile);
+    
+    // Determine full path
+    if (str_contains($templateFile, '}') || str_starts_with($templateFile, '/') || str_contains($templateFile, ':\\')) {
+        $fullPath = $templateFile;
     } else {
-        $path = rtrim(realpath(dirname($syntaxcode->filename)), '/') . '/' . $vars;
+        $currentDir = isset($syntaxcode) && method_exists($syntaxcode, 'getFilename') 
+            ? dirname($syntaxcode->getFilename()) 
+            : dirname(__FILE__);
+        $fullPath = rtrim($currentDir, '/\\') . DIRECTORY_SEPARATOR . $templateFile;
     }
-    if (file_exists($path)) {
-        return $syntaxcode->Syntax(file_get_contents($path));
+    
+    // Include file content if exists
+    if (file_exists($fullPath)) {
+        $content = file_get_contents($fullPath);
+        if ($content !== false && isset($syntaxcode) && method_exists($syntaxcode, 'processSyntax')) {
+            return $syntaxcode->processSyntax($content);
+        }
+        return $content ?: '';
     }
-    return "<br> Worning File path : $path Not Found!<br>";
-    $vars = md5_file($vars) . '.php';
+    
+    return "<div class=\"template-error\">Warning: Template file not found: {$fullPath}</div>";
 }
