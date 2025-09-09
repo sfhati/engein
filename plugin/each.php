@@ -14,47 +14,65 @@
   %array_expression:val['word word']% // you can use ' for word contain space chr
  */
 
-function each_SYNTAX($vars) {
+function each_SYNTAX(array $vars): string {
     global $syntaxcode;
-    foreach ($vars as $v => $var) {
-        $vars[$v] = $syntaxcode->Syntax($var);
+    
+    // Process nested syntax
+    if (isset($syntaxcode) && method_exists($syntaxcode, 'processSyntax')) {
+        foreach ($vars as $index => $var) {
+            $vars[$index] = $syntaxcode->processSyntax($var);
+        }
     }
-
-    if (strpos($vars[0], '-sess')) {
-        $vars[0] = str_replace('-sess', '', $vars[0]);
-        $vars_0 = '$_SESSION["' . $vars[0] . '"]';
-    } else {
-        $vars_0 = '$' . $vars[0];
-    }
-    $vars__0 = 'rnd' . rand(100, 1202) . preg_replace("/[^A-Za-z0-9 ]/", '', $vars[0]);
-    preg_match_all("/%" . $vars[0] . ":val\[([\w\s-']+)[^%]*\]%/", $vars[1], $r);
-    if (is_array($r[1]))
-        foreach ($r[1] as $r_key => $r_val) {
-            if (strpos($r_val, '-var')) {
-                $r_val1 = str_replace('-var', '', $r_val);
-                $vars[1] = str_replace('%' . $vars[0] . ':val[' . $r_val . ']%', "\$v{$vars__0}[{$r_val1}]", $vars[1]);
+    
+    $arrayName = $vars[0] ?? 'items';
+    $content = $vars[1] ?? '';
+    
+    // Handle session array option
+    $arrayVariable = str_contains($arrayName, '-sess') 
+        ? '$_SESSION[\'' . str_replace('-sess', '', $arrayName) . '\']'
+        : '$' . str_replace('-sess', '', $arrayName);
+    
+    // Generate unique variable names to avoid conflicts
+    $randomSuffix = 'rnd' . random_int(100, 9999) . preg_replace('/[^A-Za-z0-9]/', '', $arrayName);
+    $keyVar = '$k' . $randomSuffix;
+    $valueVar = '$v' . $randomSuffix;
+    $countVar = '$count' . $randomSuffix;
+    $styleVar = '$style' . $randomSuffix;
+    
+    // Process array value access patterns
+    preg_match_all("/%{$arrayName}:val\[([\w\s'-]+)\]%/", $content, $matches);
+    if (!empty($matches[1])) {
+        foreach ($matches[1] as $index => $match) {
+            $fullMatch = $matches[0][$index];
+            if (str_contains($match, '-var')) {
+                $cleanMatch = str_replace('-var', '', $match);
+                $content = str_replace($fullMatch, "{$valueVar}[{$cleanMatch}]", $content);
             } else {
-                $vars[1] = str_replace('%' . $vars[0] . ':val[' . $r_val . ']%', "<?php echo \$v{$vars__0}[{$r_val}]; ?>", $vars[1]);
+                $content = str_replace($fullMatch, "<?php echo {$valueVar}[{$match}]; ?>", $content);
             }
         }
-
-    $vars[1] = str_replace('%' . $vars[0] . ':val%', "<?php echo \$v$vars__0; ?>", $vars[1]);
-    $vars[1] = str_replace('%' . $vars[0] . ':key%', "<?php echo \$k$vars__0; ?>", $vars[1]);
-    $vars[1] = str_replace('%' . $vars[0] . ':val-var%', "\$v$vars__0", $vars[1]);
-    $vars[1] = str_replace('%' . $vars[0] . ':key-var%', "\$k$vars__0", $vars[1]);
-    $vars[1] = str_replace('%' . $vars[0] . ':%', "<?php echo \$stl$vars__0; ?>", $vars[1]);
-    $vars[1] = str_replace('%' . $vars[0] . ':#%', "<?php echo \$count$vars__0; ?>", $vars[1]);
-
-
-    return "
-<?php \$count$vars__0=0; 
-            if ( is_array($vars_0) ) 
-            foreach ( $vars_0 as \$k$vars__0 => \$v$vars__0 ) {
-\$count$vars__0++; 
-\$stl$vars__0 = (\$stl$vars__0 == 1) ? 0 : 1;
-?>
-$vars[1] 
-<?php } ?>
-";
+    }
+    
+    // Replace standard placeholders
+    $replacements = [
+        "%{$arrayName}:val%" => "<?php echo {$valueVar}; ?>",
+        "%{$arrayName}:key%" => "<?php echo {$keyVar}; ?>",
+        "%{$arrayName}:val-var%" => $valueVar,
+        "%{$arrayName}:key-var%" => $keyVar,
+        "%{$arrayName}:%" => "<?php echo {$styleVar}; ?>",
+        "%{$arrayName}:#%" => "<?php echo {$countVar}; ?>"
+    ];
+    
+    $content = str_replace(array_keys($replacements), array_values($replacements), $content);
+    
+    return "<?php 
+{$countVar} = 0; 
+{$styleVar} = 0;
+if (is_array({$arrayVariable})) {
+    foreach ({$arrayVariable} as {$keyVar} => {$valueVar}) {
+        {$countVar}++;
+        {$styleVar} = ({$styleVar} == 1) ? 0 : 1;
+?>\n{$content}\n<?php 
+    }
+} ?>";
 }
-
