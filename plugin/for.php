@@ -8,18 +8,24 @@
  <?php }?>  
 
  */
-function for_SYNTAX($vars) {
+function for_SYNTAX(array $vars): string {
     global $syntaxcode;
-    foreach ($vars as $v => $var) {
-        $vars[$v] = $syntaxcode->Syntax($var);
+    
+    // Process nested syntax
+    if (isset($syntaxcode) && method_exists($syntaxcode, 'processSyntax')) {
+        foreach ($vars as $index => $var) {
+            $vars[$index] = $syntaxcode->processSyntax($var);
+        }
     }
-    $vars[3] = str_replace('%' . $vars[0] . '%', "<?php echo \"\$$vars[0]\"; ?>", $vars[3]);
-    $vars[3] = str_replace('%' . $vars[0] . '-var%', "\$$vars[0]", $vars[3]);
-
-
-    return "
-<?php for(\$$vars[0]=$vars[1];\$$vars[0]<$vars[2];\$$vars[0]++){ ?>
-$vars[3] 
-<?php }?> 
-";
+    
+    $variable = $vars[0] ?? 'i';
+    $start = $vars[1] ?? '0';
+    $end = $vars[2] ?? '10';
+    $content = $vars[3] ?? '';
+    
+    // Replace variable placeholders in content
+    $content = str_replace("%{$variable}%", "<?php echo \${$variable}; ?>", $content);
+    $content = str_replace("%{$variable}-var%", "\${$variable}", $content);
+    
+    return "<?php for (\${$variable} = {$start}; \${$variable} < {$end}; \${$variable}++) { ?>\n{$content}\n<?php } ?>";
 }
