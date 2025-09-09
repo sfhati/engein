@@ -9,26 +9,38 @@
   [var:"variable-cons"end var] //print echo variable;
  */
 
-function var_SYNTAX($vars) {
+function var_SYNTAX(array $vars): string {
     global $syntaxcode;
-    foreach ($vars as $v => $var) {
-        $vars[$v] = $syntaxcode->Syntax($var);
+    
+    // Process nested syntax if engine is available
+    if (isset($syntaxcode) && method_exists($syntaxcode, 'processSyntax')) {
+        foreach ($vars as $index => $var) {
+            $vars[$index] = $syntaxcode->processSyntax($var);
+        }
     }
-    if (strpos($vars[0], '-var')) {
-        $vars[0] = str_replace('-var', '', $vars[0]);
-        $return = '%S#';
-    } else {
-        $return = "<?php echo %S#; ?>";
+    
+    $variable = $vars[0] ?? '';
+    $returnPattern = "<?php echo %S#; ?>";
+    
+    // Check for -var flag (don't echo, just return variable)
+    if (str_contains($variable, '-var')) {
+        $variable = str_replace('-var', '', $variable);
+        $returnPattern = '%S#';
     }
-    if (strpos($vars[0], '-sess')) {
-        $vars[0] = str_replace('-sess', '', $vars[0]);
-        $return = str_replace('%S#', '$_SESSION[%S#]', $return);
-    } else
-    if (strpos($vars[0], '-cons')) {
-        $vars[0] = str_replace('-cons', '', $vars[0]);
-    } else {
-        $return = str_replace('%S#', '$%S#', $return);
+    
+    // Check for -sess flag (session variable)
+    if (str_contains($variable, '-sess')) {
+        $variable = str_replace('-sess', '', $variable);
+        $returnPattern = str_replace('%S#', '$_SESSION[\'%S#\']', $returnPattern);
     }
-
-    return str_replace('%S#', $vars[0], $return);
+    // Check for -cons flag (constant)
+    elseif (str_contains($variable, '-cons')) {
+        $variable = str_replace('-cons', '', $variable);
+        // Keep as is for constants
+    }
+    else {
+        $returnPattern = str_replace('%S#', '$%S#', $returnPattern);
+    }
+    
+    return str_replace('%S#', $variable, $returnPattern);
 }
