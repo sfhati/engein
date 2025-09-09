@@ -3,16 +3,21 @@
   use like [if:"expr","statement"end if]
   or like [if:"expr","statement [else] statement"end if]
  */
-
-function if_SYNTAX($vars) {
+function if_SYNTAX(array $vars): string {
     global $syntaxcode;
-    foreach ($vars as $v => $var) {
-        $vars[$v] = $syntaxcode->Syntax($var);
+    
+    // Process nested syntax
+    if (isset($syntaxcode) && method_exists($syntaxcode, 'processSyntax')) {
+        foreach ($vars as $index => $var) {
+            $vars[$index] = $syntaxcode->processSyntax($var);
+        }
     }
-    $vars[1] = str_replace('[else]', "<?php }else{ ?>", $vars[1]);
-    return "
-   <?php if ($vars[0]) { ?>
- $vars[1]     
-<?php } ?>
-";
+    
+    $condition = $vars[0] ?? 'false';
+    $statement = $vars[1] ?? '';
+    
+    // Handle else clause
+    $statement = str_replace('[else]', "<?php } else { ?>", $statement);
+    
+    return "<?php if ({$condition}) { ?>\n{$statement}\n<?php } ?>";
 }
