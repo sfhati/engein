@@ -1,7 +1,12 @@
 <?php
-
-function php_SYNTAX($vars) {
+function php_SYNTAX(array $vars): string {
     global $syntaxcode;
-    $vars = $syntaxcode->Syntax($vars[0]);
-    return "<?php $vars; ?>";
+    
+    $phpCode = $vars[0] ?? '';
+    
+    if (isset($syntaxcode) && method_exists($syntaxcode, 'processSyntax')) {
+        $phpCode = $syntaxcode->processSyntax($phpCode);
+    }
+    
+    return "<?php {$phpCode}; ?>";
 }
